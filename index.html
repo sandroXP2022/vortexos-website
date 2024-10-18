@@ -1,0 +1,159 @@
+<html>
+
+<head>
+    <title>VortexOS</title>
+    <script src="https://unpkg.com/react/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    </link>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .slide-in {
+            animation: slideIn 1s ease-in-out;
+        }
+
+        .responsive-padding {
+            padding: 0.2rem;
+        }
+    </style>
+</head>
+
+<body class="bg-black text-white font-roboto">
+    <div id="root"></div>
+    <script type="text/babel">
+        class TerminalComponent extends React.Component {
+            componentDidMount() {
+                const terminal = new Terminal({
+                    theme: {
+                        background: '#1a1a1a',
+                        foreground: '#00ff00'
+                    },
+                    rows: 20, // Adjust the number of rows to fit within the height
+                    cols: 80 // Adjust the number of columns to fit within the width
+                });
+                terminal.open(this.terminalRef);
+                terminal.write('Welcome to VortexOS!\r\n');
+                terminal.write('Use the "help" command for more information...\r\n');
+                const prompts = [
+                    () => terminal.write('\r\n$ '),
+                    (cmd) => {
+                        if (cmd === null || cmd === undefined) {
+                            terminal.write("\r\n$ ");
+                        } else if (cmd === "help") {
+                            terminal.write("Comandos Disponíveis: tux, tux-dev, vinit, zoe, github, about, exit\r\n\r\n$ ");
+                        } else {
+                            terminal.write(`Comando desconhecido: ${cmd}\r\n\r\n$ `);
+                        }
+                    },
+                    // ...
+                ];
+
+                terminal.prompt = () => {
+                    prompts.forEach(prompt => prompt());
+                };
+
+                terminal.prompt();
+                terminal.onKey(e => {
+                    const char = e.key;
+                    if (char === '\r') {
+                        terminal.prompt();
+                    } else if (char === '\u007F') {
+                        if (terminal._core.buffer.x > 2) {
+                            terminal.write('\b \b');
+                        }
+                    } else {
+                        terminal.write(char);
+                    }
+                });
+            }
+
+            render() {
+                return (
+                    <div
+                        ref={ref => (this.terminalRef = ref)}
+                        className="w-full h-full rounded-lg overflow-hidden"
+                    ></div>
+                );
+            }
+        }
+
+        function App() {
+            return (
+                <div className="min-h-screen flex flex-col items-center">
+                    {/* Header */}
+                    <header className="w-full bg-gray-800 text-green-500 flex items-center justify-between p-4 rounded-b-lg fixed top-0 z-10 shadow-lg slide-in">
+                        <i className="fas fa-bars text-2xl"></i>
+                        <h1 className="text-xl font-bold">VortexOS</h1>
+                        <i className="fas fa-globe text-2xl"></i>
+                    </header>
+                    {/* Main Content */}
+                    <main className="flex flex-col items-center w-full p-2 space-y-2 mt-20">
+                        {/* Terminal Section */}
+                        <div className="bg-gray-900 w-full max-w-6xl p-2 md:p-4 rounded-lg flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 fade-in responsive-padding">
+                            <div className="flex-1 flex flex-col items-center justify-center text-center">
+                                <h2 className="text-2xl font-bold text-green-500">VortexOS</h2>
+                                <p className="text-white">VortexOS é um sistema operativo opensource baseado em Linux, com o objetivo de ser eficiente, inovador e com uma interface amigável.</p>
+                            </div>
+                            <div className="w-full md:w-1/2 h-96 rounded-lg relative bg-gray-900">
+                                <div className="w-full h-full rounded-lg overflow-hidden">
+                                    <TerminalComponent />
+                                </div>
+                            </div>
+                        </div>
+                        {/* Image Sections */}
+                        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full max-w-6xl fade-in responsive-padding">
+                            <div className="bg-gray-800 p-4 rounded-lg flex-1 flex items-center justify-between">
+                                <div className="text-left">
+                                    <h2 className="text-2xl font-bold text-green-500">Sobre o Desenvolvedor</h2>
+                                    <p className="text-white">Este sistema foi desenvolvido por Sandro Alves, um estudante de Gestão e Programação de Sistemas Informáticos como um projeto de Prova de Aptidão Profissional.</p>
+                                </div>
+                                <img src="https://avatars.githubusercontent.com/u/73885792?s=400&v=4" height="100px" width="100px" alt="Sandro Alves" className="ml-4 rounded-lg" />
+                            </div>
+                            <div className="bg-gray-700 p-4 rounded-lg flex-1 flex items-center justify-between">
+                                <div className="text-left">
+                                    <h2 className="text-2xl font-bold text-green-500">Github</h2>
+                                    <p className="text-white">O nosso projeto está disponível no Github, tanto o código-fonte usado como a documentação se quiser saber mais acerca do projeto.</p>
+                                </div>
+                                <img src="https://github.githubassets.com/favicons/favicon.png" alt="Github Logo" height="100px" width="100px" className="ml-4 rounded-lg invert" />  {/* GitHub Logo, 50x50px */}
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
